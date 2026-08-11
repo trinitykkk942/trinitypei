@@ -380,7 +380,7 @@ const yangzhouProjects = [
       "Two years teaching geography to middle schoolers back home in Yangzhou, Jiangsu.",
       "Built lessons that turned map-reading into a skill students could genuinely use."
     ],
-    note: "I loved this job — there's real fulfillment in a kid's smile when something finally clicks, and in watching them progress. But wanting to go deeper into GIS eventually pushed me out of that comfort zone and into study abroad to get there.",
+    note: "I loved this job. There's real fulfillment in a kid's smile when something finally clicks, and in watching them progress. But wanting to go deeper into GIS eventually pushed me out of that comfort zone and into study abroad to get there.",
     tags: ["Teaching", "Geography Education"],
     cardClass: "map-2",
     icon: icons.teach
@@ -389,8 +389,8 @@ const yangzhouProjects = [
     title: "Internet+ Innovation Competition: Geo-Product Design Lead",
     meta: "Provincial Silver Award, Top 5% of 200+ teams · Jun 2024 – Dec 2024",
     bullets: [
-      "Designed a GPS + BeiDou dual-mode positioning app for pet tracking, integrating geofencing alerts and location-based social features informed by 760+ survey responses analysed with AI-assisted clustering.",
-      "Built 18 interactive Figma screens; key-path optimisation lifted click-through conversion by 35% in usability testing."
+      "Took part in the Internet+ Innovation Competition as part of a student team, collaborating on the design of a GPS + BeiDou dual-mode positioning app for pet tracking, with geofencing alerts and location-based social features shaped by 760+ survey responses.",
+      "Worked with teammates through 18 interactive Figma screens; our joint key-path optimisation lifted click-through conversion by 35% in usability testing."
     ],
     tags: ["GPS/BeiDou", "Geofencing", "Figma", "UX Research"],
     cardClass: "map-3",
@@ -406,7 +406,7 @@ const shanghaiProjects = [
       "Built a data monitoring framework on first-party platform data, delivering 20+ weekly/monthly reports on traffic structure, creative performance and audience-matching.",
       "Applied Python + AI-assisted segmentation to define 10+ NEV client audience profiles (Huawei HIMA, Zeekr, Li Auto), lifting campaign CTR by 15–25%."
     ],
-    note: "Watching those numbers move after a segmentation change was genuinely exciting — it's where my interest in using data to actually shape decisions really took hold.",
+    note: "Watching those numbers move after a segmentation change was genuinely exciting, and it's where my interest in using data to actually shape decisions really took hold.",
     tags: ["Python", "Data Monitoring", "Audience Segmentation", "NEV/Automotive"],
     cardClass: "map-1",
     img: "assets/pic/bilibili.png"
