@@ -221,26 +221,6 @@ a { color: inherit; text-decoration: none; }
   50% { opacity: 1; }
 }
 
-.dreamy-bg .cloud {
-  position: absolute;
-  width: 220px;
-  opacity: 0.94;
-  filter: url(#paintEdge) blur(0.3px);
-}
-.cloud-1 { top: 8%; left: -5%; animation: drift 40s linear infinite; }
-.cloud-2 { top: 55%; right: -8%; width: 280px; animation: drift-rev 55s linear infinite; }
-.cloud-3 { top: 78%; left: 20%; width: 160px; animation: drift 65s linear infinite; }
-
-@keyframes drift {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(6vw); }
-  100% { transform: translateX(0); }
-}
-@keyframes drift-rev {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(-6vw); }
-  100% { transform: translateX(0); }
-}
 
 .nav {
   position: sticky;
