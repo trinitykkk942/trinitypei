@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trinity Pei | My GIS World</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Fredoka:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body class="intro-locked">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- fine canvas grain -->
+    <filter id="grainy">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/>
+    </filter>
+    <!-- large soft blotches, like oil pigment pooling -->
+    <filter id="blotch">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="11" result="blotchNoise"/>
+      <feColorMatrix in="blotchNoise" type="matrix" values="0 0 0 0 0.55  0 0 0 0 0.3  0 0 0 0 0.15  0 0 0 0.7 0"/>
+    </filter>
+    <!-- wobbly, hand-painted edges + brush relief (upped for a heavier, more impasto oil feel) -->
+    <filter id="paintEdge" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="3" seed="7" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" scale="24" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="brushNoise"/>
+      <feDiffuseLighting in="brushNoise" lightingColor="#ffffff" surfaceScale="2.4" diffuseConstant="1.1" result="relief">
+        <feDistantLight azimuth="235" elevation="55"/>
+      </feDiffuseLighting>
+      <feComposite in="displaced" in2="relief" operator="arithmetic" k1="0" k2="0.85" k3="0.3" k4="0"/>
+    </filter>
+    <!-- directional pencil/brush fiber, like hatched colored-pencil strokes -->
+    <filter id="paperFiber" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="turbulence" baseFrequency="0.012 0.9" numOctaves="2" seed="4" result="fiber"/>
+      <feColorMatrix in="fiber" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.7 0.7 0.7 0 0"/>
+    </filter>
+    <!-- thick impasto brush-stroke relief: coarse ridges of "paint" catching light, for
+         surfaces that should read as visibly oil-painted rather than flat/printed -->
+    <filter id="impasto" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045 0.09" numOctaves="4" seed="17" result="strokeNoise"/>
+      <feDiffuseLighting in="strokeNoise" lightingColor="#fff6e6" surfaceScale="5" diffuseConstant="1.15" result="strokeRelief">
+        <feDistantLight azimuth="235" elevation="48"/>
+      </feDiffuseLighting>
+      <feColorMatrix in="strokeRelief" type="matrix" values="0.3 0.3 0.3 0 0  0.3 0.3 0.3 0 0  0.3 0.3 0.3 0 0  0.5 0.5 0.5 0 0" result="strokeAlpha"/>
+    </filter>
+    <!-- continuously flowing liquid-marble distortion, like the video's hover-effect -->
+    <filter id="liquidFlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence id="flowTurb" type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="3" seed="9" result="flowNoise">
+        <animate attributeName="baseFrequency" dur="18s" values="0.006 0.012;0.011 0.007;0.006 0.012" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="flowNoise" scale="70" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="dreamy-bg" aria-hidden="true">
+  <div class="dreamy-shader" id="dreamyShaderStage"></div>
+  <div class="stars"></div>
+  <div class="blotch"></div>
+  <div class="canvas-fiber"></div>
+  <div class="impasto"></div>
+  <div class="grain"></div>
+  <svg class="cloud cloud-1" viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg"><path d="M40,70 a30,30 0 1,1 8,-58 a38,38 0 1,1 70,10 a26,26 0 1,1 6,48 Z" fill="#ffffff"/></svg>
+  <svg class="cloud cloud-2" viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg"><path d="M40,70 a30,30 0 1,1 8,-58 a38,38 0 1,1 70,10 a26,26 0 1,1 6,48 Z" fill="#ffffff"/></svg>
+  <svg class="cloud cloud-3" viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg"><path d="M40,70 a30,30 0 1,1 8,-58 a38,38 0 1,1 70,10 a26,26 0 1,1 6,48 Z" fill="#ffffff"/></svg>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">Trinity Pei</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#journey">Journey</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- Gated intro splash — replicates the "video" feel: a continuously flowing painterly
+       background you must click through via Explore before the rest of the site scrolls -->
+  <div class="intro-splash" id="introSplash">
+    <div class="intro-bg" aria-hidden="true">
+      <div class="hover-stage" id="hoverStage"></div>
+      <div class="intro-impasto"></div>
+      <div class="intro-grain"></div>
+      <div class="vignette"></div>
+    </div>
+    <div class="intro-content">
+      <p class="intro-signature">Trinity Pei</p>
+      <p class="intro-line">Maps are the memory,</p>
+      <p class="intro-line">coordinates are the story.</p>
+      <div class="intro-actions">
+        <a href="cv-download/Trinity_Pei_GIS.pdf" class="btn btn-outline intro-btn" download>⬇ Download Résumé</a>
+        <button type="button" class="btn btn-primary intro-btn" id="exploreBtn">Explore</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="about">
+    <div class="section-inner">
+      <h2><span class="num">01</span> About &amp; Education</h2>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>Master of Geographic Information Science candidate (University of Queensland, 2026) with hands-on experience in spatial data analysis, remote sensing, and GIS-driven decision support. Skilled in ArcGIS Pro, QGIS, Python (geopandas, scikit-learn), SQL, and no-code tools for processing large geospatial datasets.</p>
+          <p>From a geography classroom in Yangzhou to a GIS lab in Brisbane, Trinity has spent the last few years moving between teaching, further study, and industry, always circling back to maps and spatial data. Now seeking a Spatial Analyst or GIS Analyst role in Australia to apply data-driven geospatial solutions to real-world planning, environmental, or urban challenges.</p>
+          <div class="about-interests">
+            <h3>Beyond the desk</h3>
+            <div class="tags">
+              <span>🏊 Swimming</span><span>📷 Photography</span><span>🎸 Live music (post-punk)</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item highlight">
+            <span class="dot"></span>
+            <div>
+              <h3>★ Master of Geographic Information Science</h3>
+              <p class="meta">University of Queensland, Brisbane · Feb 2025 – Nov 2026</p>
+              <p>🏆 Dean's Commendation for Academic Excellence, Faculty of Science</p>
+              <ul class="card-bullets">
+                <li>Geographic Information Systems</li>
+                <li>Spatial Analysis &amp; Modelling</li>
+                <li>Earth Observation &amp; Remote Sensing Image Processing</li>
+                <li>Geospatial Processing &amp; Web Mapping</li>
+                <li>Landscape Ecology</li>
+                <li>Biogeography &amp; Geomorphology</li>
+                <li>Environmental Impact Assessment</li>
+                <li>Data Management &amp; Computing</li>
+                <li>Applied Research Methods</li>
+                <li>…</li>
+              </ul>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="dot"></span>
+            <div>
+              <h3>Master of Geography (Part-time)</h3>
+              <p class="meta">East China Normal University, Shanghai · Jun 2024 – Present</p>
+              <p>Studying part-time in Shanghai alongside industry work and, more recently, the UQ Master's in Brisbane.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="dot"></span>
+            <div>
+              <h3>Bachelor of Geographic Science</h3>
+              <p class="meta">Huaiyin Normal University, Huai'an, Jiangsu · Sep 2018 – Jun 2022</p>
+              <p>Awarded the College of Urban &amp; Environmental Sciences Scholarship five times over the degree.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="journey">
+    <div class="section-inner">
+      <h2><span class="num">02</span> My Journey</h2>
+      <p class="journey-lead">Four real coordinates, one growing story. Click a pin.</p>
+
+      <div class="journey-map">
+        <div id="journeyMap" class="journey-leaflet" aria-label="Map of Trinity's journey from China to Australia"></div>
+
+        <!-- little walking figure + 2021–2027 timeline, tucked in the corner —
+             she walks to wherever the selected stop's start date falls -->
+        <div class="journey-timeline" aria-hidden="true">
+          <div class="timeline-track" id="timelineTrack">
+            <div class="timeline-line"></div>
+            <span class="timeline-tick" style="left:0%"></span>
+            <span class="timeline-tick" style="left:16.667%"></span>
+            <span class="timeline-tick" style="left:33.333%"></span>
+            <span class="timeline-tick" style="left:50%"></span>
+            <span class="timeline-tick" style="left:66.667%"></span>
+            <span class="timeline-tick" style="left:83.333%"></span>
+            <span class="timeline-tick" style="left:100%"></span>
+            <span class="timeline-year" style="left:0%">2021</span>
+            <span class="timeline-year" style="left:16.667%">2022</span>
+            <span class="timeline-year" style="left:33.333%">2023</span>
+            <span class="timeline-year" style="left:50%">2024</span>
+            <span class="timeline-year" style="left:66.667%">2025</span>
+            <span class="timeline-year" style="left:83.333%">2026</span>
+            <span class="timeline-year" style="left:100%">2027</span>
+            <span class="timeline-more">more to explore...</span>
+            <div class="tiny-trinity" id="tinyTrinity">
+              <svg viewBox="0 0 24 32" width="22" height="30" aria-hidden="true">
+                <circle cx="12" cy="6" r="4" fill="#423a33"/>
+                <path d="M12 10 L11 20" stroke="#423a33" stroke-width="2" stroke-linecap="round"/>
+                <path class="arm arm-back" d="M11.5 12 L6 15" stroke="#423a33" stroke-width="2" stroke-linecap="round"/>
+                <path class="arm arm-front" d="M11.5 12 L17 15" stroke="#423a33" stroke-width="2" stroke-linecap="round"/>
+                <path class="leg leg-back" d="M11 20 L7 28" stroke="#e08c69" stroke-width="2.2" stroke-linecap="round"/>
+                <path class="leg leg-front" d="M11 20 L15 28" stroke="#e08c69" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="journey-detail" id="journeyDetail">
+        <!-- filled by script.js -->
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="skills">
+    <div class="section-inner">
+      <h2><span class="num">03</span> Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-group">
+          <h3>GIS &amp; Remote Sensing</h3>
+          <div class="tags">
+            <span>ArcGIS Pro</span><span>QGIS</span><span>ENVI/ERDAS (basics)</span><span>Hotspot &amp; Network Analysis</span><span>Cartography</span><span>Geocoding</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <h3>Programming &amp; Data</h3>
+          <div class="tags">
+            <span>Python</span><span>Pandas</span><span>Geopandas</span><span>scikit-learn</span><span>R</span><span>SQL</span><span>Power BI</span><span>GlideApps</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <h3>AI-Augmented Workflows</h3>
+          <div class="tags">
+            <span>ChatGPT</span><span>Claude</span><span>Copilot</span><span>Prompt Engineering</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <h3>Languages</h3>
+          <div class="tags">
+            <span>English (IELTS 7.5)</span><span>Mandarin Chinese (Native)</span>
+          </div>
+        </div>
+      </div>
+      <a href="cv-download/Trinity_Pei_GIS.pdf" class="btn btn-primary resume-btn" download>⬇ Download Résumé (PDF)</a>
+    </div>
+  </section>
+
+  <!-- Standalone Projects section removed — the one real project (Airbnb/
+       STR hotspot analysis) now lives inside the Journey detail panel,
+       attached to both Brisbane stops (3 & 6). See journeyStops in script.js. -->
+
+  <section class="section contact-section" id="contact">
+    <div class="section-inner">
+      <h2><span class="num">04</span> Contact</h2>
+      <p class="contact-lead">Always happy to talk maps, data, and everything spatial.</p>
+      <div class="contact-links">
+        <a href="mailto:trinitypei666@gmail.com">✉ trinitypei666@gmail.com</a>
+        <a href="https://www.linkedin.com/in/trinity-pei" target="_blank" rel="noopener">🔗 LinkedIn</a>
+      </div>
+
+      <form class="feedback-form" id="feedbackForm">
+        <h3>Leave a message</h3>
+        <p class="feedback-lead">Have feedback on the site, or just want to say hi? Drop a note below — it opens in your email app, ready to send.</p>
+        <div class="feedback-row">
+          <input type="text" id="feedbackName" placeholder="Your name (optional)" autocomplete="name">
+          <input type="email" id="feedbackEmail" placeholder="Your email (optional, for a reply)" autocomplete="email">
+        </div>
+        <textarea id="feedbackMessage" placeholder="Your message..." rows="4" required></textarea>
+        <button type="submit" class="btn btn-primary">Send message</button>
+        <p class="feedback-status" id="feedbackStatus" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>© <span id="year"></span> Trinity Pei</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

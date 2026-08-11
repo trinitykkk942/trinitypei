@@ -1,0 +1,1082 @@
+:root {
+  --ink: #423a33;        /* warm charcoal, easier on the watercolor bg */
+  --paper: #faf6ec;      /* warm cream, like textured paper */
+  --moss: #6fd7c2;      /* mint accent */
+  --moss-dark: #2f8f8a; /* deep mint for headings */
+  --sky: #a9d6f5;       /* sky blue */
+  --sky-dark: #5b9bd5;
+  --clay: #e08c69;      /* terracotta accent for pins/highlights */
+  --spark: #ffd977;     /* fairy-light gold for sparkles/stars */
+  --line: #e8dfd0;      /* warm sand line */
+  --muted: #948a7c;
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  /* no opaque fill here on purpose — .dreamy-bg (fixed, z-index:-1) supplies
+     the full cream base + Huemint-tinted radial washes; an opaque body
+     background would sit on top of it and hide it everywhere except Hero */
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* locked while the intro splash is showing — removed by JS once Explore is clicked */
+body.intro-locked {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ---------- Intro splash (gated "video-like" landing) ---------- */
+.intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.9s ease, visibility 0.9s ease;
+}
+
+.intro-splash.is-dismissed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro-bg { position: absolute; inset: 0; overflow: hidden; background: #ece2ce; }
+
+.hover-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hover-stage canvas { display: block; width: 100% !important; height: 100% !important; }
+
+/* thick paint-ridge relief laid over the flowing WebGL blend, so the intro
+   reads as brushed oil on canvas rather than a smooth digital gradient */
+.intro-bg .intro-impasto {
+  position: absolute;
+  inset: -10%;
+  filter: url(#impasto);
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+}
+
+.intro-bg .intro-grain {
+  position: absolute;
+  inset: -20%;
+  filter: url(#grainy);
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+}
+
+.intro-bg .vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(250,246,236,0.16) 0%, rgba(250,246,236,0.04) 42%, transparent 68%),
+    radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(40,32,24,0.28) 100%);
+}
+
+.intro-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 560px;
+  padding: 0 24px;
+}
+
+.intro-signature {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 2.4rem;
+  color: var(--ink);
+  margin: 0 0 28px;
+}
+
+.intro-line {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.intro-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+
+.intro-btn { background: rgba(250,246,236,0.75); backdrop-filter: blur(4px); }
+.intro-btn.btn-primary { background: var(--moss-dark); }
+
+@media (max-width: 620px) {
+  .intro-signature { font-size: 1.8rem; }
+  .intro-line { font-size: 1.15rem; }
+}
+
+h1, h2, h3, .logo { font-family: 'Playfair Display', serif; }
+.btn, .pin { font-family: 'Fredoka', sans-serif; }
+
+a { color: inherit; text-decoration: none; }
+
+/* dreamy pastel sky background with drifting clouds + twinkling stars */
+/* ambient tint follows the intro's Huemint palette (gold/blue/green/blush);
+   foreground UI (buttons, headings, timeline, pins) intentionally stays on
+   the site's own mint/terracotta identity — only the background mood matches */
+.dreamy-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  /* fallback paint (shows briefly before the WebGL canvas mounts, and as a
+     safety net if a visitor's browser has no WebGL) — the live shader canvas
+     below renders on top of this and is the one actually visible in normal use */
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(139,180,234,0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 88% 12%, rgba(238,207,139,0.32) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 95%, rgba(130,211,136,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 55%, rgba(229,209,215,0.22) 0%, transparent 50%),
+    linear-gradient(165deg, #f3f0e6 0%, #faf6ec 45%, #f7ece0 100%);
+}
+
+/* the actual live Huemint oil-painting shader, fixed full-viewport, sitting
+   behind every section as you scroll past Explore — same shader as the cover */
+.dreamy-shader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* brighter/clearer than before — still lighter than the full-strength
+     cover version, but the colors should read clearly, not just a hint */
+  opacity: 0.65;
+}
+.dreamy-shader canvas { display: block; width: 100% !important; height: 100% !important; }
+
+.dreamy-bg .grain {
+  position: absolute;
+  inset: -20%;
+  filter: url(#grainy);
+  opacity: 0.2;
+  mix-blend-mode: multiply;
+}
+
+.dreamy-bg .blotch {
+  position: absolute;
+  inset: -10%;
+  filter: url(#blotch);
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+}
+
+/* directional brush-fiber, gives the whole page a "painted on canvas" grain
+   instead of a flat digital gradient */
+.dreamy-bg .canvas-fiber {
+  position: absolute;
+  inset: -20%;
+  filter: url(#paperFiber);
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+}
+
+/* coarse impasto ridges — the actual "oil paint" relief texture */
+.dreamy-bg .impasto,
+.hero-bg .impasto {
+  position: absolute;
+  inset: -10%;
+  filter: url(#impasto);
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+}
+
+.dreamy-bg .stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 10% 20%, rgba(238,207,139,0.9), transparent),
+    radial-gradient(2px 2px at 25% 65%, rgba(139,180,234,0.9), transparent),
+    radial-gradient(1.5px 1.5px at 40% 15%, rgba(229,209,215,0.85), transparent),
+    radial-gradient(2px 2px at 60% 80%, rgba(130,211,136,0.9), transparent),
+    radial-gradient(1.5px 1.5px at 75% 30%, rgba(238,207,139,0.9), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(139,180,234,0.9), transparent),
+    radial-gradient(1.5px 1.5px at 50% 45%, rgba(255,255,255,0.9), transparent);
+  animation: twinkle-bg 5s ease-in-out infinite;
+}
+
+@keyframes twinkle-bg {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.dreamy-bg .cloud {
+  position: absolute;
+  width: 220px;
+  opacity: 0.6;
+  filter: url(#paintEdge) blur(0.3px);
+}
+.cloud-1 { top: 8%; left: -5%; animation: drift 40s linear infinite; }
+.cloud-2 { top: 55%; right: -8%; width: 280px; animation: drift-rev 55s linear infinite; }
+.cloud-3 { top: 78%; left: 20%; width: 160px; animation: drift 65s linear infinite; }
+
+@keyframes drift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(6vw); }
+  100% { transform: translateX(0); }
+}
+@keyframes drift-rev {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-6vw); }
+  100% { transform: translateX(0); }
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  background: rgba(251,250,255,0.8);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo { font-weight: 700; font-size: 1.1rem; letter-spacing: 0.02em; }
+
+.nav nav a {
+  margin-left: 28px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.nav nav a:hover { color: var(--moss-dark); }
+
+.hero {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 24px 100px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-bg .wash {
+  position: absolute;
+  inset: -15%;
+  /* no opaque base here anymore — these are translucent accent glows that
+     sit on top of the live shader canvas (.dreamy-shader, fixed behind the
+     whole page) so Hero keeps showing the same continuous animation as
+     every section below it, instead of covering it with a static wash */
+  background:
+    radial-gradient(circle at 48% 20%, rgba(139,180,234,0.32) 0%, transparent 30%),
+    radial-gradient(circle at 25% 55%, rgba(130,211,136,0.3) 0%, transparent 34%),
+    radial-gradient(circle at 72% 62%, rgba(238,207,139,0.32) 0%, transparent 38%),
+    radial-gradient(circle at 18% 82%, rgba(229,209,215,0.25) 0%, transparent 32%),
+    radial-gradient(circle at 82% 15%, rgba(100,150,210,0.22) 0%, transparent 34%);
+  animation: wash-drift 26s ease-in-out infinite alternate, wash-hue 42s linear infinite;
+}
+
+.hero-bg .fiber {
+  position: absolute;
+  inset: -15%;
+  filter: url(#paperFiber);
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+}
+
+.hero-bg .grain {
+  position: absolute;
+  inset: -15%;
+  filter: url(#grainy);
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+}
+
+.hero-bg .vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 45%, rgba(250,246,236,0.5) 0%, rgba(250,246,236,0.12) 40%, transparent 65%),
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(66,58,51,0.16) 100%);
+}
+
+@keyframes wash-drift {
+  0%   { transform: translate(0,0) scale(1); }
+  50%  { transform: translate(-3%,2%) scale(1.06); }
+  100% { transform: translate(2%,-2%) scale(1.03); }
+}
+
+@keyframes wash-hue {
+  0%   { filter: hue-rotate(0deg) saturate(1); }
+  50%  { filter: hue-rotate(20deg) saturate(1.1); }
+  100% { filter: hue-rotate(0deg) saturate(1); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-inner { max-width: 640px; }
+
+/* first post-Explore screen: just the two actions, no repeated copy —
+   center them so the row doesn't look stranded at the old text's left edge */
+.hero-inner-minimal {
+  max-width: none;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.hero-inner-minimal .hero-actions { justify-content: center; }
+
+.eyebrow {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--moss);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  font-size: clamp(2.8rem, 7vw, 4.6rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.05;
+  margin: 0 0 14px;
+  color: var(--moss-dark);
+  letter-spacing: -0.01em;
+}
+
+.hero-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--clay);
+  margin: 0 0 22px;
+}
+
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--ink);
+  max-width: 480px;
+  margin-bottom: 36px;
+}
+
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-block;
+  padding: 13px 26px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--moss-dark);
+  transition: all 0.2s ease;
+}
+
+.btn-primary { background: var(--moss-dark); color: #fff; box-shadow: 0 6px 18px rgba(47,143,138,0.25); }
+.btn-primary:hover { background: var(--moss); transform: translateY(-1px); }
+
+.btn-outline { background: transparent; color: var(--moss-dark); border-color: var(--sky-dark); }
+.btn-outline:hover { background: var(--sky); color: var(--ink); border-color: var(--sky); }
+
+.hero-pin {
+  position: absolute;
+  z-index: 1;
+  right: 6%;
+  top: 30%;
+  color: var(--sky-dark);
+  opacity: 0.85;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.sparkle {
+  position: absolute;
+  z-index: 1;
+  color: var(--spark);
+  font-size: 1.6rem;
+  animation: twinkle 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.sparkle-1 { top: 12%; left: 42%; font-size: 1.2rem; animation-delay: 0s; }
+.sparkle-2 { top: 60%; left: 4%; animation-delay: 0.6s; color: var(--sky-dark); }
+.sparkle-3 { top: 78%; right: 22%; font-size: 1.1rem; animation-delay: 1.2s; color: var(--moss); }
+.sparkle-4 { top: 20%; right: 30%; font-size: 1.8rem; animation-delay: 1.8s; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.section { padding: 90px 24px; border-top: 1px solid var(--line); }
+.section-inner { max-width: 1080px; margin: 0 auto; }
+
+.section h2 {
+  font-size: 1.9rem;
+  margin: 0 0 44px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.num {
+  font-size: 0.9rem;
+  color: var(--clay);
+  font-weight: 700;
+  border: 1.5px solid var(--clay);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 56px;
+}
+
+.about-text p { color: var(--ink); margin-bottom: 16px; }
+
+.about-interests { margin-top: 20px; }
+.about-interests h3 { font-size: 0.95rem; margin: 0 0 12px; color: var(--moss-dark); }
+
+.timeline-item {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.timeline-item .dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--moss);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.timeline-item h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.timeline-item .meta { color: var(--muted); font-size: 0.88rem; margin: 0 0 6px; }
+.timeline-item p:not(.meta) { margin: 0; color: var(--ink); font-size: 0.95rem; }
+
+.timeline-item.highlight h3 { color: var(--clay); }
+.timeline-item.highlight .dot { background: var(--clay); box-shadow: 0 0 0 4px rgba(193,105,59,0.18); }
+
+.journey-lead { color: var(--muted); margin: -24px 0 32px; }
+
+.journey-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 800 / 420;
+  background: linear-gradient(160deg, #eef6f0 0%, #eef3fa 45%, #fbf0e4 100%);
+  border: 1.5px dashed var(--sky);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.journey-map::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  filter: url(#grainy);
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 500; /* sits above Leaflet's panes, below popups */
+}
+
+/* little walking figure + 2021–2027 timeline, corner widget over the map —
+   Leaflet's own attribution is moved to bottom-left in script.js so the two
+   don't overlap */
+.journey-timeline {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 260px;
+  padding: 14px 16px 34px;
+  background: rgba(250, 246, 236, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  z-index: 900;
+  pointer-events: none;
+  box-shadow: 0 6px 16px rgba(66, 58, 51, 0.1);
+}
+
+.timeline-track {
+  position: relative;
+  height: 34px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 0; right: 0; top: 14px;
+  height: 2px;
+  background: var(--line);
+  border-radius: 2px;
+}
+
+.timeline-tick {
+  position: absolute;
+  top: 10px;
+  width: 2px;
+  height: 10px;
+  background: var(--sky-dark);
+  opacity: 0.5;
+  transform: translateX(-1px);
+}
+
+.timeline-year {
+  position: absolute;
+  top: 20px;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.timeline-more {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  font-size: 0.6rem;
+  font-style: italic;
+  color: var(--muted);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.tiny-trinity {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  transform: translateX(-50%);
+  transition: left 0.9s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+.tiny-trinity .arm,
+.tiny-trinity .leg {
+  transition: transform 0.18s ease-in-out;
+}
+.tiny-trinity .arm-back,
+.tiny-trinity .arm-front { transform-origin: 11.5px 12px; }
+.tiny-trinity .leg-back,
+.tiny-trinity .leg-front { transform-origin: 11px 20px; }
+
+/* subtle bob + arm/leg swing while she's mid-walk, toggled by script.js */
+.tiny-trinity.walking svg {
+  animation: tiny-bob 0.35s ease-in-out infinite;
+}
+.tiny-trinity.walking .leg-back,
+.tiny-trinity.walking .arm-front { transform: rotate(18deg); }
+.tiny-trinity.walking .leg-front,
+.tiny-trinity.walking .arm-back { transform: rotate(-18deg); }
+
+@keyframes tiny-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@media (max-width: 620px) {
+  .journey-timeline { width: 78%; right: 8px; bottom: 8px; padding: 10px 12px 18px; }
+}
+
+/* Real Leaflet map, tinted + softened to sit inside the watercolor palette */
+.journey-leaflet {
+  width: 100%;
+  height: 100%;
+}
+/* the base map tiles are almost white, so a filter alone (grayscale/saturate/
+   hue-rotate) can't paint visible color onto them — hue-rotate can't add
+   saturation to something that has none. A real overlay color, multiplied
+   over the tiles, is what actually produces a visible morandi sage-green.
+   z-index 450 sits above tilePane/overlayPane(route line, 200/400) but below
+   markerPane(600), so the numbered pins keep their original moss/clay colors
+   and only the map + route get tinted. */
+.journey-leaflet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 450;
+  background: rgba(217, 201, 148, 0.45);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.journey-leaflet .leaflet-tile-pane {
+  /* light grayscale/contrast pass under the green overlay above — keeps the
+     tiles from looking flat-colored, still has some tonal variation to it */
+  filter: grayscale(0.2) saturate(0.65) brightness(1.05) contrast(0.92);
+}
+.journey-leaflet .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(250,246,236,0.75);
+}
+
+/* custom numbered pin marker used inside Leaflet's divIcon */
+.map-pin {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--moss-dark);
+  color: var(--moss-dark);
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s, color 0.15s;
+  box-shadow: 0 3px 8px rgba(63,61,99,0.12);
+}
+
+.map-pin:hover { transform: scale(1.15); }
+
+.map-pin.pin-active {
+  background: var(--clay);
+  border-color: var(--clay);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(255,176,138,0.3);
+}
+
+/* Brisbane — the "you are here" stop. Gold instead of moss/clay so it reads
+   as categorically different from the rest of the route, not just selected. */
+.map-pin.pin-current {
+  width: 24px;
+  height: 24px;
+  background: var(--spark);
+  border-color: #e0a800;
+  color: var(--ink);
+  font-size: 0.72rem;
+  z-index: 10;
+}
+.map-pin.pin-current.pin-active {
+  background: var(--spark);
+  border-color: #e0a800;
+  color: var(--ink);
+  box-shadow: 0 0 0 4px rgba(255,217,119,0.4);
+}
+
+.pin-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--spark);
+  opacity: 0.55;
+  animation: pin-pulse-ring 2.2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes pin-pulse-ring {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+.pin-label {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 100px;
+  box-shadow: 0 3px 8px rgba(63,61,99,0.2);
+  pointer-events: none;
+}
+.pin-label::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+
+.journey-detail {
+  margin-top: 28px;
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.journey-detail::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  filter: url(#grainy);
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.journey-detail h3 { margin: 0 0 6px; font-size: 1.1rem; color: var(--moss-dark); }
+.journey-detail .meta { color: var(--clay); font-weight: 600; font-size: 0.85rem; margin: 0 0 10px; }
+.journey-detail p:not(.meta) { margin: 0; color: var(--ink); font-size: 0.95rem; }
+
+/* project card(s) attached to a journey stop — each card IS the story now
+   (image left, text right), no separate top overview block above them */
+.journey-projects {
+  margin-top: 0;
+  display: grid;
+  gap: 20px;
+}
+.journey-projects .project-card {
+  padding: 20px 22px;
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+}
+.journey-projects .project-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Brisbane's showcase — 3 across, image on top (bigger, since it's the
+   focal point here) and text below, instead of the image-left row above */
+.journey-projects-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+.journey-projects-grid .project-card {
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+}
+.journey-projects-grid .card-map {
+  flex: none;
+  width: 100%;
+  height: 200px;
+  margin-bottom: 16px;
+  position: relative;
+  cursor: zoom-in;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s;
+}
+.journey-projects-grid .project-card-body { justify-content: flex-start; }
+
+/* Brisbane only: hovering the picture itself (not the card in general)
+   pops it up larger with a lifted shadow — the project photo is the focus
+   here, so it gets its own zoom interaction distinct from the subtler
+   hover the other stops use. :hover on the card just lets it escape the
+   card's own clipping so the enlarged image and shadow aren't cut off. */
+.journey-projects-grid .project-card:hover { overflow: visible; z-index: 20; }
+.journey-projects-grid .card-map:hover {
+  transform: scale(1.28);
+  box-shadow: 0 26px 50px rgba(22,38,31,0.32);
+}
+.journey-projects-grid .card-map:hover .card-photo,
+.journey-projects-grid .card-map:hover .card-icon {
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .journey-projects-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .journey-projects .project-card { flex-direction: column; }
+}
+
+/* Shanghai: a single card whose photo is landscape, so it sits on top
+   (full width, generous height) with the text below — same idea as
+   Brisbane's grid but one column instead of a multi-up row */
+.journey-projects-stack {
+  grid-template-columns: 1fr;
+}
+.journey-projects-stack .project-card {
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+}
+.journey-projects-stack .card-map {
+  flex: none;
+  width: 100%;
+  height: 260px;
+  margin-bottom: 16px;
+}
+.journey-projects-stack .project-card-body { justify-content: flex-start; }
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+  margin-bottom: 44px;
+}
+
+.skill-group h3 { font-size: 1rem; margin-bottom: 16px; color: var(--moss-dark); }
+
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tags span {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.resume-btn { margin-top: 8px; }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.project-card {
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.project-card::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  filter: url(#grainy);
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(22,38,31,0.08);
+}
+
+.card-map {
+  position: relative;
+  flex: 0 0 220px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.map-1 { background: linear-gradient(135deg, #6fd7c2 0%, #a9d6f5 100%); }
+.map-2 { background: linear-gradient(135deg, #ffb08a 0%, #ffd977 100%); }
+.map-3 { background: linear-gradient(135deg, #a9d6f5 0%, #c9b6f0 100%); }
+
+/* real photos sit on a quiet neutral backdrop (close to the card's own
+   background) instead of a bold gradient, so the letterboxed edges from
+   object-fit: contain blend in rather than compete with the screenshot */
+.card-map-photo { background: #f3ede0; }
+
+/* real screenshots (e.g. Brisbane's Airbnb project) fill the card-map box
+   the same way the SVG illustrations do */
+.card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.project-card:hover .card-photo { transform: scale(1.05); }
+
+/* click-to-advance image pairs (e.g. Perth's before/after) — dots along the
+   bottom show which image is showing and hint that there's more than one */
+.card-carousel { cursor: pointer; }
+/* small pill behind the dots so they stay visible on both photos and the
+   neutral card-map-photo backdrop, instead of relying on image contrast */
+.carousel-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  width: fit-content;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 20px;
+  background: rgba(66,58,51,0.35);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.carousel-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+  transition: background 0.25s, transform 0.25s;
+}
+.carousel-dots span.active { background: #fff; transform: scale(1.3); }
+
+/* the little scene inside each card-map — an "interactive image": still by
+   default, fills the whole image slot, and gives a playful wiggle + scale
+   on card hover so it doesn't read as a flat decorative block */
+.card-icon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.project-card:hover .card-icon { transform: scale(1.08) rotate(-2deg); }
+
+@media (max-width: 620px) {
+  .card-map { flex-basis: auto; height: 140px; }
+}
+
+.project-card h3 { font-size: 1.05rem; margin: 0 0 10px; }
+.project-card p { font-size: 0.92rem; color: var(--ink); margin: 0 0 14px; }
+.project-card .tags { margin-bottom: 14px; }
+.project-card .tags span { font-size: 0.75rem; padding: 4px 10px; }
+
+.card-bullets {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  color: var(--ink);
+}
+.card-bullets li {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+.card-bullets li::marker { color: var(--clay); }
+.card-bullets li:last-child { margin-bottom: 0; }
+
+/* a short personal-reflection line under the bullets — softer and
+   italicised so it reads distinctly from the factual points above it */
+.card-note {
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--clay);
+  margin: -4px 0 14px;
+}
+
+.card-link {
+  display: inline-block;
+  margin-top: 4px;
+  font-weight: 600;
+  color: var(--moss-dark);
+  font-size: 0.9rem;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.card-link:hover { color: var(--clay); border-color: var(--clay); }
+
+.contact-section { text-align: center; }
+.contact-lead { color: var(--muted); margin-bottom: 24px; }
+
+.contact-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.contact-links a { border-bottom: 2px solid transparent; padding-bottom: 4px; transition: border-color 0.2s; }
+.contact-links a:hover { border-color: var(--clay); }
+
+/* "leave a message" — a lightweight feedback form under the contact links.
+   No backend, so it hands off to the visitor's email client on submit
+   (see initFeedbackForm in script.js); styled to sit quietly under the
+   contact links rather than compete with them. */
+.feedback-form {
+  max-width: 520px;
+  margin: 48px auto 0;
+  text-align: left;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+}
+.feedback-form h3 { font-size: 1.05rem; margin: 0 0 6px; color: var(--moss-dark); text-align: center; }
+.feedback-lead { color: var(--muted); font-size: 0.9rem; margin: 0 0 20px; text-align: center; }
+
+.feedback-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.feedback-row input { flex: 1 1 200px; }
+
+.feedback-form input,
+.feedback-form textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.6);
+  color: var(--ink);
+  transition: border-color 0.2s;
+}
+.feedback-form input:focus,
+.feedback-form textarea:focus {
+  outline: none;
+  border-color: var(--sky-dark);
+}
+.feedback-form textarea { resize: vertical; margin-bottom: 16px; }
+
+.feedback-form .btn { display: block; margin: 0 auto; border: none; cursor: pointer; }
+.feedback-status { text-align: center; font-size: 0.85rem; color: var(--muted); margin: 12px 0 0; min-height: 1.2em; }
+
+@media (max-width: 620px) {
+  .feedback-row { flex-direction: column; }
+}
+
+.footer {
+  text-align: center;
+  padding: 32px 24px 50px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 760px) {
+  .about-grid, .skills-grid, .projects-grid { grid-template-columns: 1fr; }
+  .nav nav a { margin-left: 16px; font-size: 0.85rem; }
+  .hero-pin { display: none; }
+}
