@@ -317,7 +317,7 @@ const icons = {
 const brisbaneProjects = [
   {
     title: "Spatial Data Analysis: Airbnb / Short-Term Rental Study",
-    meta: "University of Queensland · Supervised by Prof. Thomas Siglar · Mar 2026 – Present",
+    meta: "University of Queensland · Supervised by Prof. Thomas Sigler · Mar 2026 – Present",
     bullets: [
       "Studied how Gold Coast short-term rentals respond to major events, through supply geography, event structure, and visitor type.",
       "Found that sport, festival, and business events each leave a distinct, measurable footprint on rental demand and pricing.",
