@@ -215,18 +215,34 @@ body.intro-locked {
   .intro-content {
     width: min(100% - 28px, 520px);
     grid-template-columns: 1fr;
-    gap: 22px;
-    padding: 84px 0 28px;
+    gap: 18px;
+    padding: 64px 0 28px;
   }
-  .intro-copy { text-align: center; justify-self: center; }
-  .intro-signature { font-size: 1.8rem; margin-bottom: 16px; }
-  .intro-line { font-size: 1.15rem; }
-  .intro-actions { justify-content: center; margin-top: 22px; }
-  #exploreBtn { padding: 17px 40px; font-size: 1.05rem; min-width: 0; width: 100%; max-width: 320px; }
+  /* on mobile the photo shrinks to free up vertical space, and Explore
+     moves up right under the signature (ahead of the two quote lines) so
+     it sits higher on the screen and reads as the clear next step —
+     desktop keeps its own untouched order/layout above. */
+  .intro-copy {
+    text-align: center;
+    justify-self: center;
+    display: flex;
+    flex-direction: column;
+  }
+  .intro-signature { order: 1; font-size: 1.8rem; margin-bottom: 0; }
+  .intro-actions { order: 2; justify-content: center; margin: 18px 0; }
+  .intro-line { order: 3; font-size: 1.15rem; }
+  #exploreBtn {
+    padding: 17px 40px;
+    font-size: 1.08rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: 0 10px 26px rgba(31, 66, 36, 0.45);
+  }
   .intro-poster {
     order: -1;
     justify-self: center;
-    width: min(48vh, 80vw, 320px);
+    width: min(36vh, 58vw, 230px);
     min-width: 0;
     transform: rotate(0.8deg);
   }
