@@ -325,7 +325,7 @@ const brisbaneProjects = [
     ],
     tags: ["Hotspot Analysis", "Python", "R", "ArcGIS Pro", "QGIS"],
     cardClass: "map-1",
-    images: ["assets/pic/gc1.png", "assets/pic/gc2.png"]
+    images: ["assets/pic/gc1.jpg", "assets/pic/gc2.webp"]
   },
   {
     title: "Urban Expansion Mapping: Perth (Burswood Peninsula)",
@@ -337,7 +337,7 @@ const brisbaneProjects = [
     ],
     tags: ["Remote Sensing", "Landsat ARD", "ENDISI", "GMM Classification", "Change Detection"],
     cardClass: "map-2",
-    images: ["assets/pic/perth1.png", "assets/pic/perth2.png"],
+    images: ["assets/pic/perth1.webp", "assets/pic/perth2.webp"],
     link: "https://arcg.is/iaDvX",
     linkText: "🔗 View the interactive StoryMap"
   },
@@ -351,7 +351,7 @@ const brisbaneProjects = [
     ],
     tags: ["Spatial Analysis", "Distance Decay", "Python", "GeoPandas"],
     cardClass: "map-3",
-    images: ["assets/pic/crime1.png", "assets/pic/crime2.png"]
+    images: ["assets/pic/crime1.webp", "assets/pic/crime2.jpg"]
   },
   {
     title: "UQKids Childcare Management App",
@@ -363,7 +363,7 @@ const brisbaneProjects = [
     ],
     tags: ["No-Code", "Glide", "UML", "Product Design"],
     cardClass: "map-1",
-    img: "assets/pic/kid-collage.png",
+    img: "assets/pic/kid-collage.jpg",
     link: "https://go.glideapps.com/template/VJtc6dZxO1O5gqz6G3rJ-template-published?privateTemplateToken=oldUGxZku8JDIK8UNY0a",
     linkText: "🔗 Try the Glide app"
   }
@@ -383,7 +383,7 @@ const yangzhouProjects = [
     note: "I loved this job. There's real fulfillment in a kid's smile when something finally clicks, and in watching them progress. But wanting to go deeper into GIS eventually pushed me out of that comfort zone and into study abroad to get there.",
     tags: ["Teaching", "Geography Education"],
     cardClass: "map-2",
-    img: "assets/pic/teacher-classroom-vintage-white-outline-v4-muted-color-cropped.png"
+    img: "assets/pic/teacher-classroom-vintage-white-outline-v4-muted-color-cropped.jpg"
   },
   {
     title: "Internet+ Innovation Competition: Geo-Product Design Lead",
@@ -394,7 +394,7 @@ const yangzhouProjects = [
     ],
     tags: ["GPS/BeiDou", "Geofencing", "Figma", "UX Research"],
     cardClass: "map-3",
-    img: "assets/pic/dog-vintage-white-outline-cropped.png"
+    img: "assets/pic/dog-vintage-white-outline-cropped.jpg"
   }
 ];
 
@@ -409,7 +409,7 @@ const shanghaiProjects = [
     note: "Watching those numbers move after a segmentation change was genuinely exciting, and it's where my interest in using data to actually shape decisions really took hold.",
     tags: ["Python", "Data Monitoring", "Audience Segmentation", "NEV/Automotive"],
     cardClass: "map-1",
-    img: "assets/pic/bilibili.png"
+    img: "assets/pic/bilibili.jpg"
   }
 ];
 
@@ -423,7 +423,7 @@ const beijingProjects = [
     ],
     tags: ["Remote Sensing", "AI", "GIS", "Agriculture"],
     cardClass: "map-2",
-    img: "assets/pic/speech.png"
+    img: "assets/pic/speech.jpg"
   }
 ];
 
@@ -488,9 +488,9 @@ function renderStop(id) {
     const hasCarousel = p.images && p.images.length > 1;
     const hasPhoto = hasCarousel || !!p.img;
     const mapContent = hasCarousel
-      ? `<img src="${p.images[0]}" alt="${p.title}" class="card-photo">
+      ? `<img src="${p.images[0]}" alt="${p.title}" class="card-photo" loading="lazy" decoding="async">
          <div class="carousel-dots">${p.images.map((_, i) => `<span class="${i === 0 ? 'active' : ''}"></span>`).join('')}</div>`
-      : (p.img ? `<img src="${p.img}" alt="${p.title}" class="card-photo">` : (p.icon || ''));
+      : (p.img ? `<img src="${p.img}" alt="${p.title}" class="card-photo" loading="lazy" decoding="async">` : (p.icon || ''));
     // real photos get a neutral backdrop that blends with the card instead
     // of the bold map-1/2/3 gradients (those are reserved for the SVG
     // illustrations, where the bright color is part of the drawing)
