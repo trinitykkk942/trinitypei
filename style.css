@@ -64,6 +64,22 @@ body.intro-locked {
 
 /* thick paint-ridge relief laid over the flowing WebGL blend, so the intro
    reads as brushed oil on canvas rather than a smooth digital gradient */
+/* deep forest-green colour wash over the flowing texture. Uses `multiply`
+   rather than `color` — `color` only takes the hue/saturation from this
+   layer and keeps the *backdrop's* luminosity, so however dark a green you
+   pick here it still comes out looking pastel/minty. `multiply` actually
+   darkens, so the green reads as genuinely deep and contrasts hard against
+   the photo's white torn edge, while the flowing texture still shows
+   through as grain/shading. (Text colour below is flipped to cream to
+   stay legible against this much darker backdrop.) */
+.intro-bg .intro-tint {
+  position: absolute;
+  inset: 0;
+  background: #1f4224;
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+}
+
 .intro-bg .intro-impasto {
   position: absolute;
   inset: -10%;
@@ -91,23 +107,35 @@ body.intro-locked {
 .intro-content {
   position: relative;
   z-index: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(320px, 1fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 70px);
+  padding: 0 0 0 clamp(24px, 6vw, 72px);
+}
+
+.intro-copy {
   text-align: center;
+  justify-self: center;
   max-width: 560px;
-  padding: 0 24px;
 }
 
 .intro-signature {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-size: 2.4rem;
-  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  /* was var(--ink) (warm charcoal) — switched to cream now that the
+     background is a genuinely dark green (multiply blend, see
+     .intro-tint), where dark-brown text lost most of its contrast. */
+  color: var(--paper);
   margin: 0 0 28px;
 }
 
 .intro-line {
   font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  color: var(--ink);
+  font-size: clamp(1.25rem, 2.6vw, 2.3rem);
+  color: rgba(250,246,236,0.88);
   margin: 0;
   line-height: 1.4;
 }
@@ -122,10 +150,86 @@ body.intro-locked {
 
 .intro-btn { background: rgba(250,246,236,0.75); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 .intro-btn.btn-primary { background: var(--moss-dark); }
+/* bigger tap target than the default .btn — this is the one thing every
+   visitor needs to press to get into the site, so it should be easy to
+   hit on both mouse and touch. #exploreBtn (id) so it reliably wins over
+   the later, same-specificity .btn base-padding rule regardless of source
+   order. */
+#exploreBtn {
+  padding: 20px 52px;
+  font-size: 1.2rem;
+  min-width: 220px;
+}
+
+.intro-poster {
+  position: relative;
+  justify-self: end;
+  width: min(48vw, 620px);
+  min-width: 300px;
+  margin: 0;
+  aspect-ratio: 3 / 5;
+  transform: rotate(1.2deg);
+}
+
+/* torn cream-paper backing peeking out from behind the photo's ragged edge —
+   a scrap of newsprint ripped out and pasted onto the page, roughest on the
+   left side where the photo meets the copy panel so the two feel hand-torn
+   apart rather than laid out in clean rectangles */
+.intro-poster::before {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  background: var(--paper);
+  clip-path: polygon(0.0% 0.08%, 16.67% 3.07%, 33.33% 4.6%, 50.0% -2.1%, 66.67% 2.66%, 83.33% 2.04%, 100.0% 0.56%, 98.64% 0.0%, 95.27% 16.67%, 98.84% 33.33%, 102.46% 50.0%, 97.52% 66.67%, 100.02% 83.33%, 99.36% 100.0%, 100.0% 101.21%, 83.33% 104.45%, 66.67% 99.02%, 50.0% 104.98%, 33.33% 95.62%, 16.67% 103.13%, 0.0% 101.31%, -2.69% 100.0%, 4.52% 83.33%, 1.3% 66.67%, 10.01% 50.0%, -6.38% 33.33%, 0.88% 16.67%, 2.94% 0.0%);
+  transform: rotate(-2deg);
+  box-shadow: 0 18px 30px rgba(66, 58, 51, 0.22);
+  z-index: 0;
+}
+
+.intro-poster img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  clip-path: polygon(0.0% 0.2%, 14.29% -1.9%, 28.57% -0.9%, 42.86% -1.11%, 57.14% 0.95%, 71.43% 0.71%, 85.71% 1.57%, 100.0% -0.58%, 99.89% 0.0%, 98.12% 14.29%, 98.87% 28.57%, 100.02% 42.86%, 98.11% 57.14%, 98.8% 71.43%, 100.6% 85.71%, 100.06% 100.0%, 100.0% 99.61%, 85.71% 100.36%, 71.43% 101.24%, 57.14% 98.03%, 42.86% 101.22%, 28.57% 100.79%, 14.29% 99.36%, 0.0% 99.52%, 2.4% 100.0%, -2.45% 85.71%, -6.11% 71.43%, -6.05% 57.14%, 5.21% 42.86%, 1.56% 28.57%, 4.61% 14.29%, 1.21% 0.0%);
+  filter: drop-shadow(0 10px 16px rgba(66, 58, 51, 0.16));
+}
+
+/* subtle newsprint-fibre grain riding along the torn photo, tying it back to
+   the site's hand-painted/paper texture language elsewhere on the page */
+.intro-poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0.0% 0.2%, 14.29% -1.9%, 28.57% -0.9%, 42.86% -1.11%, 57.14% 0.95%, 71.43% 0.71%, 85.71% 1.57%, 100.0% -0.58%, 99.89% 0.0%, 98.12% 14.29%, 98.87% 28.57%, 100.02% 42.86%, 98.11% 57.14%, 98.8% 71.43%, 100.6% 85.71%, 100.06% 100.0%, 100.0% 99.61%, 85.71% 100.36%, 71.43% 101.24%, 57.14% 98.03%, 42.86% 101.22%, 28.57% 100.79%, 14.29% 99.36%, 0.0% 99.52%, 2.4% 100.0%, -2.45% 85.71%, -6.11% 71.43%, -6.05% 57.14%, 5.21% 42.86%, 1.56% 28.57%, 4.61% 14.29%, 1.21% 0.0%);
+  filter: url(#paperFiber);
+  mix-blend-mode: multiply;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 2;
+}
 
 @media (max-width: 620px) {
-  .intro-signature { font-size: 1.8rem; }
+  .intro-content {
+    width: min(100% - 28px, 520px);
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 84px 0 28px;
+  }
+  .intro-copy { text-align: center; justify-self: center; }
+  .intro-signature { font-size: 1.8rem; margin-bottom: 16px; }
   .intro-line { font-size: 1.15rem; }
+  .intro-actions { justify-content: center; margin-top: 22px; }
+  #exploreBtn { padding: 17px 40px; font-size: 1.05rem; min-width: 0; width: 100%; max-width: 320px; }
+  .intro-poster {
+    order: -1;
+    justify-self: center;
+    width: min(48vh, 80vw, 320px);
+    min-width: 0;
+    transform: rotate(0.8deg);
+  }
 }
 
 h1, h2, h3, .logo { font-family: 'Playfair Display', serif; }
@@ -452,10 +556,42 @@ a { color: inherit; text-decoration: none; }
 .about-grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  gap: 56px;
+  gap: 40px;
+  position: relative;
+  overflow: hidden;
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 40px 44px;
+  box-shadow: 0 10px 26px rgba(22,38,31,0.06);
+}
+/* same warm-paper grain used on the project cards below, so the About
+   panel reads as part of the same "card" system rather than a one-off */
+.about-grid::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  filter: url(#grainy);
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
 
+/* min-width: 0 lets these grid items shrink below their content's natural
+   width instead of forcing the whole .about-grid to overflow on narrow
+   screens (CSS Grid items default to min-width: auto) */
+.about-text { min-width: 0; }
 .about-text p { color: var(--ink); margin-bottom: 16px; }
+
+.about-text .card-bullets { margin-bottom: 20px; }
+
+/* thin rule down the middle of the About panel, separating the intro
+   column from the education timeline instead of just relying on the gap */
+.timeline {
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  padding-left: 36px;
+}
 
 .about-interests { margin-top: 20px; }
 .about-interests h3 { font-size: 0.95rem; margin: 0 0 12px; color: var(--moss-dark); }
@@ -571,7 +707,12 @@ a { color: inherit; text-decoration: none; }
   top: -18px;
   left: 0;
   transform: translateX(-50%);
-  transition: left 0.9s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  /* base fallback duration/easing — script.js overrides both inline per
+     move (duration scaled to distance, linear easing) so a short hop and a
+     full-width traverse both read as a walk at a constant pace, instead of
+     one fixed-time eased slide that looks like a jump/warp over long
+     distances. */
+  transition: left 0.9s linear;
 }
 
 .tiny-trinity .arm,
@@ -583,14 +724,28 @@ a { color: inherit; text-decoration: none; }
 .tiny-trinity .leg-back,
 .tiny-trinity .leg-front { transform-origin: 11px 20px; }
 
-/* subtle bob + arm/leg swing while she's mid-walk, toggled by script.js */
+/* subtle bob + a real alternating leg/arm step cycle while she's mid-walk
+   (toggled by script.js) — previously the limbs just snapped to one static
+   mid-stride pose for the whole move, which read fine for a quick 950ms
+   hop but looked like frozen bobbing once longer walks (proportional to
+   distance) were introduced. Now the legs/arms swing back and forth in
+   sync with the bob for as long as `.walking` is applied. */
 .tiny-trinity.walking svg {
   animation: tiny-bob 0.35s ease-in-out infinite;
 }
 .tiny-trinity.walking .leg-back,
-.tiny-trinity.walking .arm-front { transform: rotate(18deg); }
+.tiny-trinity.walking .arm-front { animation: tiny-step-a 0.35s ease-in-out infinite; }
 .tiny-trinity.walking .leg-front,
-.tiny-trinity.walking .arm-back { transform: rotate(-18deg); }
+.tiny-trinity.walking .arm-back { animation: tiny-step-b 0.35s ease-in-out infinite; }
+
+@keyframes tiny-step-a {
+  0%, 100% { transform: rotate(18deg); }
+  50% { transform: rotate(-18deg); }
+}
+@keyframes tiny-step-b {
+  0%, 100% { transform: rotate(-18deg); }
+  50% { transform: rotate(18deg); }
+}
 
 @keyframes tiny-bob {
   0%, 100% { transform: translateY(0); }
@@ -633,27 +788,30 @@ a { color: inherit; text-decoration: none; }
   background: rgba(250,246,236,0.75);
 }
 
-/* custom numbered pin marker used inside Leaflet's divIcon */
+/* custom numbered pin marker used inside Leaflet's divIcon — sized up and
+   given a bolder border/shadow so the pins read clearly against the map
+   tiles, plus an idle pulse ring + hover tooltip (below) so it's obvious
+   at a glance that they're clickable, not just decorative map labels. */
 .map-pin {
   position: relative;
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   background: #fff;
-  border: 1.5px solid var(--moss-dark);
+  border: 2px solid var(--moss-dark);
   color: var(--moss-dark);
   font-family: 'Fredoka', sans-serif;
   font-weight: 600;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.15s, background 0.15s, color 0.15s;
-  box-shadow: 0 3px 8px rgba(63,61,99,0.12);
+  box-shadow: 0 4px 10px rgba(63,61,99,0.22);
 }
 
-.map-pin:hover { transform: scale(1.15); }
+.map-pin:hover { transform: scale(1.18); }
 
 .map-pin.pin-active {
   background: var(--clay);
@@ -665,12 +823,12 @@ a { color: inherit; text-decoration: none; }
 /* Brisbane — the "you are here" stop. Gold instead of moss/clay so it reads
    as categorically different from the rest of the route, not just selected. */
 .map-pin.pin-current {
-  width: 24px;
-  height: 24px;
+  width: 29px;
+  height: 29px;
   background: var(--spark);
   border-color: #e0a800;
   color: var(--ink);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   z-index: 10;
 }
 .map-pin.pin-current.pin-active {
@@ -689,6 +847,55 @@ a { color: inherit; text-decoration: none; }
   animation: pin-pulse-ring 2.2s ease-out infinite;
   pointer-events: none;
 }
+
+/* quieter idle ripple on every other pin — Brisbane already gets the loud
+   gold pulse above (it's "you are here"), but the rest of the route just
+   sat there looking static, giving no hint they're clickable until you
+   happened to hover. A soft outline ripple + hover tooltip (both pure CSS,
+   no markup change needed) makes that clear at a glance. */
+.map-pin:not(.pin-current)::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--moss-dark);
+  opacity: 0;
+  animation: pin-hint-ring 2.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes pin-hint-ring {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  75%, 100% { transform: scale(1.7); opacity: 0; }
+}
+
+/* "Click to explore" tooltip on hover — reuses the same speech-bubble look
+   as the permanent "I'm here" label on the current-stop pin, but only
+   appears on :hover for the rest so it doesn't clutter the map by default. */
+.map-pin:not(.pin-current)::before {
+  content: 'Click to explore';
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.68rem;
+  padding: 4px 10px;
+  border-radius: 100px;
+  box-shadow: 0 3px 8px rgba(63,61,99,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+}
+.map-pin:not(.pin-current):hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 @keyframes pin-pulse-ring {
   0% { transform: scale(1); opacity: 0.55; }
   100% { transform: scale(2.6); opacity: 0; }
@@ -763,45 +970,106 @@ a { color: inherit; text-decoration: none; }
   min-width: 0;
 }
 
-/* Brisbane's showcase — 3 across, image on top (bigger, since it's the
-   focal point here) and text below, instead of the image-left row above */
+/* Brisbane's showcase — single column, one project per row, image on top
+   and as large as comfortably fits (this is where the real project work
+   is the whole point, so it gets the most screen real estate on the
+   page). Real enlarging is now a click-to-lightbox (see .card-zoom /
+   .lightbox below) rather than an inline hover-scale, since a hover
+   effect doesn't work on touch and got unwieldy at this size anyway. */
 .journey-projects-grid {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
 }
 .journey-projects-grid .project-card {
   flex-direction: column;
   gap: 0;
-  padding: 16px;
+  padding: 20px;
 }
 .journey-projects-grid .card-map {
   flex: none;
   width: 100%;
-  height: 200px;
-  margin-bottom: 16px;
+  height: min(64vh, 620px);
+  margin-bottom: 18px;
   position: relative;
   cursor: zoom-in;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s;
+  transition: box-shadow 0.3s;
 }
 .journey-projects-grid .project-card-body { justify-content: flex-start; }
 
-/* Brisbane only: hovering the picture itself (not the card in general)
-   pops it up larger with a lifted shadow — the project photo is the focus
-   here, so it gets its own zoom interaction distinct from the subtler
-   hover the other stops use. :hover on the card just lets it escape the
-   card's own clipping so the enlarged image and shadow aren't cut off. */
-.journey-projects-grid .project-card:hover { overflow: visible; z-index: 20; }
-.journey-projects-grid .card-map:hover {
-  transform: scale(1.28);
-  box-shadow: 0 26px 50px rgba(22,38,31,0.32);
-}
-.journey-projects-grid .card-map:hover .card-photo,
-.journey-projects-grid .card-map:hover .card-icon {
-  transform: none;
+.journey-projects-grid .project-card:hover .card-map {
+  box-shadow: 0 18px 38px rgba(22,38,31,0.2);
 }
 
 @media (max-width: 900px) {
-  .journey-projects-grid { grid-template-columns: 1fr; }
+  .journey-projects-grid .card-map { height: min(48vh, 420px); }
 }
+
+/* small "enlarge" button in the corner of any project photo — opens the
+   full-size lightbox. Kept separate from the image itself so it doesn't
+   fight with the existing click-to-advance behaviour on multi-image
+   (carousel) cards. */
+.card-zoom {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(23, 20, 17, 0.55);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  transition: background 0.2s, transform 0.2s;
+  z-index: 5;
+}
+.card-zoom:hover { background: rgba(23, 20, 17, 0.78); transform: scale(1.08); }
+
+/* full-screen image lightbox, shared by every project photo on the page */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 16, 12, 0.92);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+  padding: 40px;
+}
+.lightbox.is-open { opacity: 1; visibility: visible; }
+.lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+  border-radius: 4px;
+}
+.lightbox-close {
+  position: absolute;
+  top: 22px;
+  right: 26px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.22); }
 
 @media (max-width: 620px) {
   .journey-projects .project-card { flex-direction: column; }
@@ -898,6 +1166,11 @@ a { color: inherit; text-decoration: none; }
    object-fit: contain blend in rather than compete with the screenshot */
 .card-map-photo { background: #f3ede0; }
 
+/* single-image photo cards (no carousel) are clickable on the whole image
+   to enlarge — cursor hints that, distinct from carousel cards below whose
+   click instead advances to the next photo. */
+.card-map-photo:not(.card-carousel) { cursor: zoom-in; }
+
 /* real screenshots (e.g. Brisbane's Airbnb project) fill the card-map box
    the same way the SVG illustrations do */
 .card-photo {
@@ -982,16 +1255,52 @@ a { color: inherit; text-decoration: none; }
   margin: -4px 0 14px;
 }
 
+/* award called out on its own line at the end of a timeline entry — kept
+   quiet (no badge/pill) so it doesn't outweigh the degree itself; the extra
+   specificity (.timeline-item p.card-award) is needed to beat the earlier
+   ".timeline-item p:not(.meta)" catch-all rule */
+.timeline-item p.card-award {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clay);
+  margin: 6px 0 0;
+}
+
+/* it happens to fit on one line at the panel's normal widths; on anything
+   narrow enough that it wouldn't, let it wrap rather than force nowrap —
+   nowrap on a grid item's content pushes the item's min-content width out
+   and overflows the card on small screens */
+@media (min-width: 761px) {
+  .timeline-item p.card-award {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* project links were plain underlined text, easy to miss next to the
+   bullets/tags above — now a small pill button so they read as a clear
+   call to action instead of just more body copy. */
 .card-link {
-  display: inline-block;
-  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 9px 18px;
+  border-radius: 100px;
   font-weight: 600;
   color: var(--moss-dark);
-  font-size: 0.9rem;
-  border-bottom: 1px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
+  font-size: 0.88rem;
+  background: rgba(47,143,138,0.08);
+  border: 1.5px solid var(--moss-dark);
+  transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
-.card-link:hover { color: var(--clay); border-color: var(--clay); }
+.card-link:hover {
+  background: var(--moss-dark);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(47,143,138,0.28);
+}
 
 .contact-section { text-align: center; }
 .contact-lead { color: var(--muted); margin-bottom: 24px; }
@@ -1059,6 +1368,17 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 760px) {
   .about-grid, .skills-grid, .projects-grid { grid-template-columns: 1fr; }
+  .about-grid { padding: 28px 24px; gap: 36px; }
+  .timeline { border-left: none; padding-left: 0; }
   .nav nav a { margin-left: 16px; font-size: 0.85rem; }
   .hero-pin { display: none; }
+}
+
+/* narrow phones: "Contact & Resume" no longer fits on one line next to the
+   logo and the other nav items, so let the nav wrap onto its own centered
+   row underneath instead of squeezing/overlapping the logo. */
+@media (max-width: 480px) {
+  .nav-inner { flex-wrap: wrap; row-gap: 8px; padding: 14px 20px; }
+  .nav nav { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; }
+  .nav nav a { margin: 0 8px; font-size: 0.8rem; }
 }

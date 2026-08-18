@@ -383,7 +383,7 @@ const yangzhouProjects = [
     note: "I loved this job. There's real fulfillment in a kid's smile when something finally clicks, and in watching them progress. But wanting to go deeper into GIS eventually pushed me out of that comfort zone and into study abroad to get there.",
     tags: ["Teaching", "Geography Education"],
     cardClass: "map-2",
-    icon: icons.teach
+    img: "assets/pic/teacher-classroom-vintage-white-outline-v4-muted-color-cropped.png"
   },
   {
     title: "Internet+ Innovation Competition: Geo-Product Design Lead",
@@ -394,7 +394,7 @@ const yangzhouProjects = [
     ],
     tags: ["GPS/BeiDou", "Geofencing", "Figma", "UX Research"],
     cardClass: "map-3",
-    icon: icons.paw
+    img: "assets/pic/dog-vintage-white-outline-cropped.png"
   }
 ];
 
@@ -423,7 +423,7 @@ const beijingProjects = [
     ],
     tags: ["Remote Sensing", "AI", "GIS", "Agriculture"],
     cardClass: "map-2",
-    img: "assets/pic/summer school.png"
+    img: "assets/pic/speech.png"
   }
 ];
 
@@ -495,9 +495,10 @@ function renderStop(id) {
     // of the bold map-1/2/3 gradients (those are reserved for the SVG
     // illustrations, where the bright color is part of the drawing)
     const mapClass = hasPhoto ? 'card-map-photo' : (p.cardClass || 'map-1');
+    const zoomBtn = hasPhoto ? `<button type="button" class="card-zoom" aria-label="Enlarge image">⤢</button>` : '';
     return `
     <article class="project-card">
-      <div class="card-map ${mapClass}${hasCarousel ? ' card-carousel' : ''}" data-idx="${idx}" aria-hidden="true">${mapContent}</div>
+      <div class="card-map ${mapClass}${hasCarousel ? ' card-carousel' : ''}" data-idx="${idx}" aria-hidden="true">${mapContent}${zoomBtn}</div>
       <div class="project-card-body">
         <h3>${p.title}</h3>
         <p class="meta">${p.meta}</p>
@@ -531,6 +532,54 @@ function renderStop(id) {
     });
   });
 }
+
+// Full-screen lightbox for project photos — one shared overlay (markup
+// lives in index.html), opened via event delegation so it keeps working
+// across renderStop() re-renders without re-wiring listeners each time.
+// The "enlarge" button is a separate element from the photo itself so it
+// doesn't fight with the click-to-advance carousel handler above.
+(function initLightbox() {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const closeBtn = document.getElementById('lightboxClose');
+  if (!lightbox || !lightboxImg) return;
+
+  function openLightbox(src, alt) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || '';
+    lightbox.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('click', (e) => {
+    const zoomBtn = e.target.closest('.card-zoom');
+    if (zoomBtn) {
+      e.stopPropagation();
+      const mapEl = zoomBtn.closest('.card-map');
+      const img = mapEl && mapEl.querySelector('img.card-photo');
+      if (img) openLightbox(img.src, img.alt);
+      return;
+    }
+    // Single-image project photos (no carousel) are directly clickable to
+    // enlarge, not just via the small ⤢ button — carousel cards keep the
+    // photo click reserved for advancing to the next image instead, so
+    // their enlarge-button is the only way to open the lightbox there.
+    const singleMapEl = e.target.closest('.card-map-photo:not(.card-carousel)');
+    if (singleMapEl) {
+      const img = singleMapEl.querySelector('img.card-photo');
+      if (img) { openLightbox(img.src, img.alt); return; }
+    }
+    if (e.target === lightbox) closeLightbox();
+  });
+  closeBtn && closeBtn.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
 
 (function initJourneyMap() {
   const el = document.getElementById('journeyMap');
@@ -694,11 +743,22 @@ function renderStop(id) {
   function walkTinyTrinityTo(id) {
     const figure = document.getElementById('tinyTrinity');
     if (!figure) return;
-    const pct = timelineFraction(id) * 100;
-    figure.style.left = `${pct}%`;
+    const targetPct = timelineFraction(id) * 100;
+    const currentPct = parseFloat(figure.style.left) || 0;
+    const distance = Math.abs(targetPct - currentPct);
+    // Constant walking speed instead of a fixed-time slide: a short hop
+    // between adjacent stops and a full traverse across the whole timeline
+    // both cover ground at the same pace, so a big jump (e.g. Yangzhou ->
+    // Beijing) visibly walks the distance rather than warping there in the
+    // same 0.9s a short hop used to take. Clamped so a tiny move still
+    // shows at least a step or two, and the longest possible traverse
+    // doesn't feel sluggish.
+    const duration = Math.min(2.6, Math.max(0.55, distance * 0.032));
+    figure.style.transition = `left ${duration}s linear`;
+    figure.style.left = `${targetPct}%`;
     figure.classList.add('walking');
     clearTimeout(figure._walkTimeout);
-    figure._walkTimeout = setTimeout(() => figure.classList.remove('walking'), 950);
+    figure._walkTimeout = setTimeout(() => figure.classList.remove('walking'), duration * 1000);
   }
 
   function selectStop(id) {
@@ -742,7 +802,7 @@ function renderStop(id) {
     if (email) bodyLines.push(`Reply to: ${email}`);
     const body = bodyLines.join('\n');
 
-    const mailto = `mailto:trinitypei666@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailto = `mailto:trinity.w.pei@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
 
     status.textContent = 'Opening your email app…';
